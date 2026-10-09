@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="PestSense"/>
+<meta name="theme-color" content="#5bde6a"/>
+<link rel="manifest" href="/static/manifest.json"/>
+<link rel="apple-touch-icon" href="/static/icon-192.png"/>
+<title>PestSense – Smart Pest Detection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0f0a;--surface:#111a0f;--card:#162012;--border:#1f3020;--accent:#5bde6a;--accent2:#b8f5be;--warn:#f5c842;--danger:#f55e42;--text:#e8f5e4;--muted:#7a9b78;--radius:14px;--mono:'DM Mono',monospace;--sans:'Inter',sans-serif;--display:'Syne',sans-serif;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;padding-bottom:80px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(91,222,106,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,222,106,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+.container{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:0 16px 20px;}
+
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 16px;border-bottom:1px solid var(--border);margin-bottom:24px;position:sticky;top:0;z-index:100;background:rgba(11,15,10,.92);backdrop-filter:blur(12px);margin-left:-16px;margin-right:-16px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.logo-text{font-family:var(--display);font-weight:800;font-size:1.2rem;}
+.logo-text span{color:var(--accent);}
+.nav-links{display:flex;gap:8px;}
+.nav-link{font-family:var(--mono);font-size:.68rem;color:var(--muted);border:1px solid var(--border);padding:6px 10px;border-radius:100px;text-decoration:none;}
+.nav-link.active,.nav-link:active{color:var(--accent);border-color:var(--accent);}
+
+/* Install Banner */
+#installBanner{display:none;background:#162012;border:1px solid rgba(91,222,106,.3);border-radius:var(--radius);padding:14px;margin-bottom:16px;align-items:center;gap:10px;}
+#installBanner.show{display:flex;}
+.install-text strong{font-family:var(--display);font-size:.9rem;display:block;}
+.install-text span{font-size:.75rem;color:var(--muted);}
+.install-text{flex:1;}
+.install-btn{background:var(--accent);color:var(--bg);border:none;font-family:var(--display);font-weight:700;font-size:.8rem;padding:9px 14px;border-radius:9px;cursor:pointer;flex-shrink:0;}
+.install-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:4px;flex-shrink:0;}
+
+/* Hero */
+.hero{text-align:center;margin-bottom:24px;}
+.hero h1{font-family:var(--display);font-size:clamp(1.7rem,7vw,2.6rem);font-weight:800;line-height:1.1;margin-bottom:10px;}
+.hero h1 em{color:var(--accent);font-style:normal;}
+.hero p{color:var(--muted);font-size:.88rem;line-height:1.6;}
+
+/* Upload */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);background:var(--surface);padding:28px 16px;text-align:center;cursor:pointer;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.upload-zone:active{background:var(--card);border-color:var(--accent);}
+.upload-icon{font-size:2.2rem;margin-bottom:10px;}
+.upload-zone h2{font-family:var(--display);font-size:1rem;font-weight:700;margin-bottom:4px;}
+.upload-zone p{color:var(--muted);font-size:.8rem;}
+.upload-zone p strong{color:var(--accent);}
+#fileInput{display:none;}
+.camera-row{display:flex;gap:8px;margin-top:12px;width:100%;}
+.cam-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:var(--card);border:1px solid var(--border);color:var(--muted);font-size:.8rem;padding:10px 8px;border-radius:9px;cursor:pointer;}
+.cam-btn:active{background:var(--border);}
+.preview-wrap{display:none;margin-top:14px;position:relative;justify-content:center;}
+.preview-wrap.visible{display:flex;}
+#previewImg{max-height:200px;border-radius:10px;border:2px solid var(--border);object-fit:contain;max-width:100%;}
+.preview-remove{position:absolute;top:5px;right:5px;background:rgba(11,15,10,.85);border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;}
+.preview-remove:active{background:var(--danger);color:#fff;}
+
+/* Detect Button */
+.btn-detect{display:block;width:100%;margin-top:14px;padding:17px;background:var(--accent);color:var(--bg);font-family:var(--display);font-weight:700;font-size:1rem;letter-spacing:.03em;border:none;border-radius:var(--radius);cursor:pointer;}
+.btn-detect:active:not(:disabled){transform:scale(.98);background:var(--accent2);}
+.btn-detect:disabled{opacity:.4;cursor:not-allowed;}
+
+/* Spinner */
+.spinner-wrap{display:none;flex-direction:column;align-items:center;gap:14px;padding:28px;}
+.spinner-wrap.visible{display:flex;}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner-label{color:var(--muted);font-family:var(--mono);font-size:.8rem;}
+
+/* Results */
+#results{display:none;margin-top:24px;}
+#results.visible{display:block;animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.result-verdict{font-family:var(--display);font-size:1.35rem;font-weight:800;margin-bottom:6px;}
+.result-verdict.has-pest{color:var(--warn);}
+.result-verdict.critical{color:var(--danger);}
+.confidence-chip{display:inline-block;font-family:var(--mono);font-size:.72rem;padding:4px 11px;border-radius:100px;background:var(--card);border:1px solid var(--border);margin-bottom:16px;}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.card-label{font-family:var(--mono);font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;}
+.card-value{font-family:var(--display);font-size:.95rem;font-weight:700;}
+.card.remedy{grid-column:1/-1;}
+.card.remedy .card-value{font-family:var(--sans);font-size:.88rem;font-weight:400;line-height:1.6;color:var(--accent2);}
+.sev{display:inline-block;padding:2px 9px;border-radius:100px;font-size:.72rem;font-weight:600;font-family:var(--mono);}
+.sev.Low{background:rgba(91,222,106,.15);color:var(--accent);}
+.sev.Medium{background:rgba(245,200,66,.15);color:var(--warn);}
+.sev.High{background:rgba(245,94,66,.15);color:#f58042;}
+.sev.Critical{background:rgba(245,66,66,.2);color:var(--danger);}
+.top-preds{margin-top:14px;}
+.top-preds h3{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+.pred-bar{margin-bottom:9px;}
+.pred-bar-header{display:flex;justify-content:space-between;margin-bottom:3px;font-size:.82rem;}
+.pred-bar-pct{font-family:var(--mono);font-size:.75rem;color:var(--muted);}
+.bar-track{height:5px;background:var(--border);border-radius:100px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--accent);border-radius:100px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.no-pest-banner{background:rgba(91,222,106,.06);border:1px solid rgba(91,222,106,.2);border-radius:var(--radius);padding:24px;text-align:center;}
+.no-pest-banner .icon{font-size:2rem;margin-bottom:8px;}
+.no-pest-banner h3{font-family:var(--display);font-size:1.05rem;color:var(--accent);margin-bottom:5px;}
+.no-pest-banner p{color:var(--muted);font-size:.85rem;}
+.mode-ribbon{font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:right;margin-top:10px;}
+.error-banner{display:none;background:rgba(245,94,66,.1);border:1px solid rgba(245,94,66,.3);border-radius:var(--radius);padding:12px 16px;color:#f5846a;font-size:.85rem;margin-top:12px;}
+.error-banner.visible{display:block;}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(11,15,10,.95);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:6px 0 calc(6px + env(safe-area-inset-bottom));}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-family:var(--mono);font-size:.6rem;padding:5px 2px;}
+.bnav-item.active,.bnav-item:active{color:var(--accent);}
+.bnav-icon{font-size:1.2rem;}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text">Pest<span>Sense</span></div>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-link active">Detect</a>
+      <a href="/metrics" class="nav-link">📊 Metrics</a>
+    </div>
+  </header>
+
+  <div id="installBanner">
+    <div class="install-text">
+      <strong>📲 Install PestSense</strong>
+      <span>Add to home screen for offline access</span>
+    </div>
+    <button class="install-btn" id="installBtn">Install</button>
+    <button class="install-close" id="installClose">✕</button>
+  </div>
+
+  <div class="hero">
+    <h1>Detect crop pests<br><em>instantly</em> with AI</h1>
+    <p>Upload or photograph your crop — AI identifies pest type, severity & remedy.</p>
+  </div>
+
+  <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-icon">📷</div>
+    <h2>Tap to upload image</h2>
+    <p>Supports <strong>JPG, PNG, WEBP</strong></p>
+    <input type="file" id="fileInput" accept="image/*"/>
+    <div class="camera-row" onclick="event.stopPropagation()">
+      <button class="cam-btn" onclick="openCamera()">📸 Camera</button>
+      <button class="cam-btn" onclick="document.getElementById('fileInput').click()">🖼 Gallery</button>
+    </div>
+    <div class="preview-wrap" id="previewWrap">
+      <img id="previewImg" src="" alt="Preview"/>
+      <button class="preview-remove" id="removeBtn">✕</button>
+    </div>
+  </div>
+
+  <div class="error-banner" id="errBanner"></div>
+  <div class="spinner-wrap" id="spinner">
+    <div class="spinner"></div>
+    <div class="spinner-label">Analyzing with CNN model…</div>
+  </div>
+  <button class="btn-detect" id="detectBtn" disabled>🔍 &nbsp; Detect Pests</button>
+
+  <div id="results">
+    <div class="no-pest-banner" id="noPestBanner" style="display:none">
+      <div class="icon">✅</div>
+      <h3>No Pests Detected</h3>
+      <p>No pest indicators found. Keep monitoring regularly.</p>
+    </div>
+    <div id="pestDetails" style="display:none">
+      <div class="result-verdict" id="verdictText"></div>
+      <div class="confidence-chip" id="confChip"></div>
+      <div class="cards">
+        <div class="card"><div class="card-label">Pest Identified</div><div class="card-value" id="pestName">—</div></div>
+        <div class="card"><div class="card-label">Severity Level</div><div class="card-value" id="sevValue">—</div></div>
+        <div class="card remedy"><div class="card-label">Recommended Action</div><div class="card-value" id="remedyText">—</div></div>
+      </div>
+      <div class="top-preds"><h3>Top Predictions</h3><div id="barList"></div></div>
+    </div>
+    <div class="mode-ribbon" id="modeRibbon"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="/" class="bnav-item active"><span class="bnav-icon">🔍</span><span>Detect</span></a>
+  <a href="/metrics" class="bnav-item"><span class="bnav-icon">📊</span><span>Metrics</span></a>
+  <a href="#" class="bnav-item" onclick="shareApp();return false;"><span class="bnav-icon">📤</span><span>Share</span></a>
+  <a href="#" class="bnav-item" onclick="showInfo();return false;"><span class="bnav-icon">ℹ️</span><span>About</span></a>
+</nav>
+
+<script>
+const API_BASE = window.location.origin;
+let selectedFile = null, deferredPrompt = null;
+
+// PWA Install
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.remove('show');
+});
+document.getElementById('installClose').addEventListener('click', () =>
+  document.getElementById('installBanner').classList.remove('show'));
+
+// Service Worker
+if ('serviceWorker' in navigator)
+  navigator.serviceWorker.register('/static/sw.js').catch(()=>{});
+
+// File handling
+function openCamera() {
+  const i = document.createElement('input');
+  i.type='file'; i.accept='image/*'; i.capture='environment';
+  i.onchange = e => loadFile(e.target.files[0]); i.click();
+}
+document.getElementById('fileInput').addEventListener('change', e => loadFile(e.target.files[0]));
+document.getElementById('removeBtn').addEventListener('click', e => { e.stopPropagation(); clearFile(); });
+
+function loadFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  selectedFile = file;
+  document.getElementById('previewImg').src = URL.createObjectURL(file);
+  document.getElementById('previewWrap').classList.add('visible');
+  document.getElementById('detectBtn').disabled = false;
+  hideResults(); hideError();
+}
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('previewImg').src = '';
+  document.getElementById('previewWrap').classList.remove('visible');
+  document.getElementById('detectBtn').disabled = true;
+  document.getElementById('fileInput').value = '';
+  hideResults();
+}
+
+// Detection
+document.getElementById('detectBtn').addEventListener('click', async () => {
+  if (!selectedFile) return;
+  if (navigator.vibrate) navigator.vibrate(30);
+  showSpinner(); hideResults(); hideError();
+  const fd = new FormData(); fd.append('image', selectedFile);
+  try {
+    const res  = await fetch(`${API_BASE}/api/detect`, {method:'POST', body:fd});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    renderResults(data);
+    if (navigator.vibrate) navigator.vibrate(data.pest_detected ? [100,50,100] : 60);
+  } catch(err) {
+    showError('⚠ ' + err.message);
+  } finally { hideSpinner(); }
+});
+
+function renderResults(d) {
+  document.getElementById('results').classList.add('visible');
+  const f = d.features || {};
+  document.getElementById('modeRibbon').textContent =
+    `mode: ${d.mode} · green:${f.green_ratio||0} · brown:${f.brown_ratio||0}`;
+  if (!d.pest_detected) {
+    document.getElementById('noPestBanner').style.display = 'block';
+    document.getElementById('pestDetails').style.display = 'none';
+    return;
+  }
+  document.getElementById('noPestBanner').style.display = 'none';
+  document.getElementById('pestDetails').style.display = 'block';
+  const v = document.getElementById('verdictText');
+  v.textContent = `⚠ ${d.pest_name} Detected`;
+  v.className = 'result-verdict ' + (d.severity==='Critical'?'critical':'has-pest');
+  document.getElementById('confChip').textContent = `${d.confidence}% confidence`;
+  document.getElementById('pestName').textContent = d.pest_name;
+  document.getElementById('sevValue').innerHTML = `<span class="sev ${d.severity}">${d.severity}</span>`;
+  document.getElementById('remedyText').textContent = d.remedy || '—';
+
+  const barList = document.getElementById('barList');
+  barList.innerHTML = '';
+  const preds = d.top_predictions || [];
+  if (!preds.length) return;
+  const maxC = preds[0].confidence || 0.001;
+  preds.forEach(p => {
+    const name = p.pest || p.label || 'Unknown';
+    const c = typeof p.confidence==='number' ? p.confidence : 0;
+    barList.innerHTML += `<div class="pred-bar">
+      <div class="pred-bar-header"><span>${name}</span><span class="pred-bar-pct">${(c*100).toFixed(1)}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%" data-target="${((c/maxC)*100).toFixed(1)}%"></div></div>
+    </div>`;
+  });
+  requestAnimationFrame(() =>
+    document.querySelectorAll('.bar-fill').forEach(el => el.style.width = el.dataset.target));
+}
+
+function shareApp() {
+  if (navigator.share) navigator.share({title:'PestSense',text:'AI crop pest detection',url:window.location.origin}).catch(()=>{});
+  else navigator.clipboard.writeText(window.location.origin).then(()=>alert('Link copied!')).catch(()=>{});
+}
+function showInfo() {
+  alert('PestSense v1.0\n\nSmart Pest Presence Detection System\nFlask + MobileNetV2 + ImageNet\n\nTeam:\nR S Abhinav Nithish (25MAG0104)\n');
+}
+function showSpinner(){document.getElementById('spinner').classList.add('visible');document.getElementById('detectBtn').disabled=true;}
+function hideSpinner(){document.getElementById('spinner').classList.remove('visible');document.getElementById('detectBtn').disabled=!selectedFile;}
+function hideResults(){document.getElementById('results').classList.remove('visible');}
+function showError(m){document.getElementById('errBanner').textContent=m;document.getElementById('errBanner').classList.add('visible');}
+function hideError(){document.getElementById('errBanner').classList.remove('visible');}
+</script>
+</body>
+</html>
