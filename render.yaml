@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: pestsense
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    runtime: python-3.10.13
