@@ -3,3 +3,6 @@ flask-cors==4.0.0
 Pillow==10.0.0
 numpy==1.26.4
 tensorflow==2.13.0
+Pillow==9.5.0
+setuptools>=65.5.1
+wheel>=0.38.4
