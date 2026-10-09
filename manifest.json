@@ -1,9 +1,11 @@
+
 {
   "name": "PestSense – Smart Pest Detection",
   "short_name": "PestSense",
   "description": "AI-powered crop pest detection using deep learning",
   "start_url": "/",
-  "display": "standalone",
+  "scope": "/",
+  "display": "fullscreen",
   "background_color": "#0b0f0a",
   "theme_color": "#5bde6a",
   "orientation": "portrait",
@@ -21,6 +23,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["agriculture", "productivity", "utilities"],
+  "categories": [
+    "agriculture",
+    "productivity",
+    "utilities"
+  ],
   "screenshots": []
 }
