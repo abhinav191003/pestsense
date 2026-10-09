@@ -171,16 +171,25 @@ def run_inference(img: Image.Image) -> dict:
 
 @app.route("/")
 def index():
-    return send_from_directory("static", "index.html")
+    return send_from_directory(".", "index.html")
+
 
 @app.route("/metrics")
 def metrics():
-    return send_from_directory("static", "metrics.html")
+    return send_from_directory(".", "metrics.html")
+
 
 @app.route("/static/<path:filename>")
 def static_files(filename):
-    return send_from_directory("static", filename)
-
+    allowed_files = {
+        "manifest.json",
+        "icon-192.png",
+        "icon-512.png",
+        "sw.js",
+    }
+    if filename not in allowed_files:
+        return "Not Found", 404
+    return send_from_directory(".", filename)
 @app.route("/api/health")
 def health():
     return jsonify({"status":"ok","tensorflow":TF_AVAILABLE,"model_loaded":_model is not None})
